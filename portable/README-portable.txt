@@ -11,6 +11,7 @@ H3C 交换机端口监控 - 绿色版
    - Monitor:Switches:Host：H3C 交换机 IP
    - Monitor:Switches:Community：SNMP community
    - Monitor:PollIntervalSeconds：轮询间隔秒数
+   - Monitor:Firewall:EnsureSnmpOutboundRule：是否自动创建出站 UDP SNMP 防火墙规则，默认 true
 
 3. 双击 run-console.cmd 前台运行。
    这个模式适合先测试 SNMP 和飞书是否正常。
@@ -28,6 +29,8 @@ H3C 交换机端口监控 - 绿色版
 - Windows 电脑必须能访问交换机 UDP 161 端口。
 - 交换机 SNMP ACL 需要放行这台 Windows 电脑的 IP。
 - Windows 电脑必须能访问飞书机器人 Webhook，也就是 HTTPS 443 出站可达。
+
+程序会尝试自动创建 Windows 防火墙出站 UDP 161 放行规则。这个规则不是入站规则，不会把本机 UDP 161 暴露给外部访问。
 
 四、交换机侧 SNMP 示例
 

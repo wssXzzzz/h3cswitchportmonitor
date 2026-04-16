@@ -12,6 +12,7 @@ Host.CreateDefaultBuilder(args)
         services.Configure<MonitorOptions>(context.Configuration.GetSection("Monitor"));
         services.AddHttpClient<FeishuNotifier>();
         services.AddSingleton<ISnmpClient, SharpSnmpClient>();
+        services.AddSingleton<WindowsFirewallConfigurator>();
         services.AddSingleton<PortStateStore>();
         services.AddHostedService<Worker>();
     })

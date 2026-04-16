@@ -173,6 +173,11 @@ internal static class Program
                 AlertDeviceErrors = true,
                 AlertDeviceRecovery = true,
                 StateFile = "state/port-state.json",
+                Firewall = new
+                {
+                    EnsureSnmpOutboundRule = true,
+                    RuleName = "H3CSwitchPortMonitor SNMP Outbound"
+                },
                 Feishu = new
                 {
                     WebhookUrl = webhookUrl,

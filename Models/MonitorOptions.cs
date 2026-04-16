@@ -7,8 +7,15 @@ public sealed class MonitorOptions
     public bool AlertDeviceErrors { get; set; } = true;
     public bool AlertDeviceRecovery { get; set; } = true;
     public string StateFile { get; set; } = "state/port-state.json";
+    public FirewallOptions Firewall { get; set; } = new();
     public FeishuOptions Feishu { get; set; } = new();
     public List<SwitchOptions> Switches { get; set; } = [];
+}
+
+public sealed class FirewallOptions
+{
+    public bool EnsureSnmpOutboundRule { get; set; } = true;
+    public string RuleName { get; set; } = "H3CSwitchPortMonitor SNMP Outbound";
 }
 
 public sealed class FeishuOptions

@@ -11,6 +11,7 @@ public sealed class Worker : BackgroundService
     private readonly ISnmpClient _snmpClient;
     private readonly FeishuNotifier _notifier;
     private readonly PortStateStore _stateStore;
+    private readonly WindowsFirewallConfigurator _firewallConfigurator;
     private readonly Dictionary<string, bool> _deviceErrorState = new(StringComparer.OrdinalIgnoreCase);
 
     public Worker(
@@ -18,18 +19,21 @@ public sealed class Worker : BackgroundService
         IOptions<MonitorOptions> options,
         ISnmpClient snmpClient,
         FeishuNotifier notifier,
-        PortStateStore stateStore)
+        PortStateStore stateStore,
+        WindowsFirewallConfigurator firewallConfigurator)
     {
         _logger = logger;
         _options = options.Value;
         _snmpClient = snmpClient;
         _notifier = notifier;
         _stateStore = stateStore;
+        _firewallConfigurator = firewallConfigurator;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         ValidateOptions();
+        await _firewallConfigurator.EnsureSnmpOutboundRuleAsync(stoppingToken);
 
         var previousStates = await _stateStore.LoadAsync(stoppingToken);
         var pollInterval = TimeSpan.FromSeconds(Math.Max(1, _options.PollIntervalSeconds));

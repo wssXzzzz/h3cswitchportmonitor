@@ -40,6 +40,10 @@ interface GigabitEthernet1/0/1
 {
   "Monitor": {
     "PollIntervalSeconds": 10,
+    "Firewall": {
+      "EnsureSnmpOutboundRule": true,
+      "RuleName": "H3CSwitchPortMonitor SNMP Outbound"
+    },
     "Feishu": {
       "WebhookUrl": "https://open.feishu.cn/open-apis/bot/v2/hook/替换为你的机器人token",
       "Secret": "如果机器人启用了签名校验则填写"
@@ -64,6 +68,8 @@ interface GigabitEthernet1/0/1
 ```
 
 如果只想监控指定端口，可以填写 `IncludeInterfaceIndexes`。如果想排除个别端口，填写 `ExcludeInterfaceIndexes`。
+
+程序启动时会在 Windows 上自动检查并创建一条出站 UDP SNMP 防火墙规则，默认规则名是 `H3CSwitchPortMonitor SNMP Outbound`。这个规则只放行本程序访问交换机的出站 UDP 161，不会打开本机入站 UDP 161。
 
 ## 发布
 
