@@ -1,0 +1,12 @@
+bin/
+obj/
+publish/
+artifacts/
+installer/Payload/
+state/
+.dotnet/
+.dotnet-install.sh
+.DS_Store
+*.user
+*.suo
+*.tmp

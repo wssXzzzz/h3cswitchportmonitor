@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>H3CSwitchPortMonitorInstaller</AssemblyName>
+    <RootNamespace>H3CSwitchPortMonitorInstaller</RootNamespace>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Payload/service.zip" LogicalName="service.zip" Condition="Exists('Payload/service.zip')" />
+  </ItemGroup>
+</Project>
