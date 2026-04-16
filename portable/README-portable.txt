@@ -15,6 +15,7 @@ H3C 交换机端口监控 - 绿色版
 
 3. 双击 run-console.cmd 前台运行。
    这个模式适合先测试 SNMP 和飞书是否正常。
+   如果窗口直接退出或提示错误，请查看 logs\startup-error.log。
 
 二、长期后台运行
 
@@ -32,7 +33,13 @@ H3C 交换机端口监控 - 绿色版
 
 程序会尝试自动创建 Windows 防火墙出站 UDP 161 放行规则。这个规则不是入站规则，不会把本机 UDP 161 暴露给外部访问。
 
-四、交换机侧 SNMP 示例
+四、直接闪退时看这里
+
+不要直接双击 H3CSwitchPortMonitor.exe，先双击 run-console.cmd。这个脚本会在程序退出后暂停窗口。
+
+如果仍然退出，请打开 logs\startup-error.log，把里面的错误内容拿来排查。常见原因是 appsettings.json 没有配置、飞书 Webhook 地址不正确，或者交换机 SNMP 参数填写错误。
+
+五、交换机侧 SNMP 示例
 
 snmp-agent
 snmp-agent sys-info version v2c

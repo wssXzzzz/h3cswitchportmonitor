@@ -32,6 +32,24 @@ public sealed class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        try
+        {
+            await RunMonitorAsync(stoppingToken);
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            _logger.LogInformation("H3C switch port monitor stopped.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "H3C switch port monitor stopped unexpectedly.");
+            await StartupDiagnostics.RecordFatalAsync("Worker stopped unexpectedly.", ex, CancellationToken.None);
+            throw;
+        }
+    }
+
+    private async Task RunMonitorAsync(CancellationToken stoppingToken)
+    {
         ValidateOptions();
         await _firewallConfigurator.EnsureSnmpOutboundRuleAsync(stoppingToken);
 

@@ -2,6 +2,41 @@
 
 Windows 服务程序，用 SNMP 轮询 H3C 交换机端口状态，发现端口 `ifOperStatus` 变化后推送到飞书群机器人。端口备注读取标准 IF-MIB 的 `ifAlias` 字段，对应 H3C 接口下配置的 `description`。
 
+## 网络拓扑
+
+程序只安装在 Windows 监控电脑上。Windows 电脑作为 SNMP Manager，主动访问 H3C 交换机的管理 IP；H3C 交换机作为 SNMP Agent，响应端口状态数据。检测到端口状态变化后，Windows 电脑再通过 HTTPS 调用飞书机器人 Webhook。
+
+```mermaid
+flowchart LR
+    W["Windows 监控电脑<br/>H3CSwitchPortMonitor"] -->|"SNMP 查询<br/>UDP 出站 161"| S["H3C 交换机管理 IP"]
+    S -->|"SNMP 响应"| W
+    W -->|"飞书机器人推送<br/>HTTPS 出站 443"| F["飞书开放平台 / 飞书群机器人"]
+    F --> G["飞书群"]
+```
+
+多台交换机时，Windows 监控电脑需要能访问每台交换机的管理 IP：
+
+```mermaid
+flowchart TB
+    W["Windows 监控电脑<br/>例如 192.168.1.100"]
+    S1["H3C 交换机 A<br/>管理 IP 192.168.1.1"]
+    S2["H3C 交换机 B<br/>管理 IP 192.168.1.2"]
+    S3["H3C 交换机 C<br/>管理 IP 192.168.1.3"]
+    F["飞书机器人 Webhook"]
+
+    W -->|"UDP 161"| S1
+    W -->|"UDP 161"| S2
+    W -->|"UDP 161"| S3
+    W -->|"HTTPS 443"| F
+```
+
+防火墙和 ACL 放行方向：
+
+- Windows 监控电脑 -> H3C 交换机管理 IP：UDP 161
+- Windows 监控电脑 -> 飞书 Webhook：TCP 443
+- H3C 交换机 SNMP ACL：放行 Windows 监控电脑 IP
+- Windows 电脑不需要开放入站 UDP 161，本程序只会自动配置出站 UDP SNMP 规则
+
 ## 功能
 
 - 读取端口名：`ifName`，OID `1.3.6.1.2.1.31.1.1.1.1`
@@ -140,6 +175,24 @@ artifacts\portable\H3CSwitchPortMonitor-portable-win-x64.zip
 ```
 
 把 zip 复制到 Windows 电脑后直接解压。先双击 `edit-config.cmd` 修改配置，再双击 `run-console.cmd` 前台测试运行。需要后台长期运行时，右键 `install-service.cmd` 选择“以管理员身份运行”。
+
+## 直接闪退排查
+
+不要直接双击 `H3CSwitchPortMonitor.exe` 排查问题，先双击绿色版里的 `run-console.cmd`。这个脚本会在程序退出后暂停窗口。
+
+如果程序启动失败，会把错误写到：
+
+```text
+logs\startup-error.log
+```
+
+常见原因：
+
+- `appsettings.json` 没有放在 exe 同目录
+- 飞书机器人 `WebhookUrl` 还没替换成真实地址
+- JSON 格式改坏了
+- 交换机 IP、SNMP community 或 SNMP 版本填写错误
+- 普通用户权限无法创建 Windows 防火墙规则；可以右键 `run-console.cmd` 或 `install-service.cmd` 选择“以管理员身份运行”
 
 ## 手动安装为 Windows 服务
 
