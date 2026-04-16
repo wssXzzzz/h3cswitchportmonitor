@@ -146,7 +146,7 @@ internal static class Program
         var secret = Prompt("飞书机器人 Secret，未启用签名可留空", "", allowEmpty: true);
         var switchName = Prompt("交换机名称", "核心交换机-1", allowEmpty: false);
         var switchHost = Prompt("交换机 IP 或域名", "192.168.1.1", allowEmpty: false);
-        var community = Prompt("SNMP Community", "public", allowEmpty: false);
+        var community = Prompt("SNMP Community", "", allowEmpty: false);
         var interval = PromptInt("轮询间隔秒数", 10, min: 1);
 
         var config = new
@@ -172,6 +172,8 @@ internal static class Program
                 AlertOnFirstPoll = false,
                 AlertDeviceErrors = true,
                 AlertDeviceRecovery = true,
+                RetryCount = 2,
+                RetryDelayMs = 1000,
                 StateFile = "state/port-state.json",
                 Firewall = new
                 {

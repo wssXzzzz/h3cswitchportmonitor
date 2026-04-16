@@ -9,7 +9,7 @@ H3C 交换机端口监控 - 绿色版
    - Monitor:Feishu:WebhookUrl：飞书群机器人 Webhook 地址
    - Monitor:Feishu:Secret：飞书机器人签名密钥，未启用签名可留空
    - Monitor:Switches:Host：H3C 交换机 IP
-   - Monitor:Switches:Community：SNMP community
+   - Monitor:Switches:Community：交换机上配置的只读 SNMP community
    - Monitor:PollIntervalSeconds：轮询间隔秒数
    - Monitor:Firewall:EnsureSnmpOutboundRule：是否自动创建出站 UDP SNMP 防火墙规则，默认 true
 
@@ -43,7 +43,7 @@ H3C 交换机端口监控 - 绿色版
 
 snmp-agent
 snmp-agent sys-info version v2c
-snmp-agent community read public
+snmp-agent community read <只读community>
 
 接口备注示例：
 

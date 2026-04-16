@@ -89,7 +89,7 @@ public sealed class Worker : BackgroundService
 
         try
         {
-            interfaces = await _snmpClient.ReadInterfacesAsync(device, stoppingToken);
+            interfaces = await ReadInterfacesWithRetryAsync(device, stoppingToken);
         }
         catch (OperationCanceledException)
         {
@@ -140,6 +140,42 @@ public sealed class Worker : BackgroundService
             if (previous.OperStatus != port.OperStatus)
             {
                 await TryNotifyPortChangedAsync(device, previous, port, stoppingToken);
+            }
+        }
+    }
+
+    private async Task<IReadOnlyList<InterfaceSnapshot>> ReadInterfacesWithRetryAsync(
+        SwitchOptions device,
+        CancellationToken stoppingToken)
+    {
+        var retryCount = Math.Max(0, _options.RetryCount);
+        var retryDelay = TimeSpan.FromMilliseconds(Math.Max(0, _options.RetryDelayMs));
+
+        for (var attempt = 0; ; attempt++)
+        {
+            try
+            {
+                return await _snmpClient.ReadInterfacesAsync(device, stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex) when (attempt < retryCount)
+            {
+                _logger.LogWarning(ex,
+                    "SNMP poll failed for {SwitchName} ({Host}:{Port}). Retry {RetryAttempt}/{RetryCount} after {RetryDelayMs}ms.",
+                    device.DisplayName,
+                    device.Host,
+                    device.Port,
+                    attempt + 1,
+                    retryCount,
+                    retryDelay.TotalMilliseconds);
+
+                if (retryDelay > TimeSpan.Zero)
+                {
+                    await Task.Delay(retryDelay, stoppingToken);
+                }
             }
         }
     }

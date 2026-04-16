@@ -6,6 +6,8 @@ public sealed class MonitorOptions
     public bool AlertOnFirstPoll { get; set; }
     public bool AlertDeviceErrors { get; set; } = true;
     public bool AlertDeviceRecovery { get; set; } = true;
+    public int RetryCount { get; set; } = 2;
+    public int RetryDelayMs { get; set; } = 1000;
     public string StateFile { get; set; } = "state/port-state.json";
     public FirewallOptions Firewall { get; set; } = new();
     public FeishuOptions Feishu { get; set; } = new();
@@ -29,7 +31,7 @@ public sealed class SwitchOptions
     public string Name { get; set; } = "";
     public string Host { get; set; } = "";
     public int Port { get; set; } = 161;
-    public string Community { get; set; } = "public";
+    public string Community { get; set; } = "";
     public string Version { get; set; } = "V2";
     public int TimeoutMs { get; set; } = 5000;
     public int MaxRepetitions { get; set; } = 10;
