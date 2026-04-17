@@ -77,6 +77,7 @@ interface GigabitEthernet1/0/1
     "PollIntervalSeconds": 10,
     "RetryCount": 2,
     "RetryDelayMs": 1000,
+    "SnmpTextEncoding": "GB18030",
     "Firewall": {
       "EnsureSnmpOutboundRule": true,
       "RuleName": "H3CSwitchPortMonitor SNMP Outbound"
@@ -91,6 +92,7 @@ interface GigabitEthernet1/0/1
         "Host": "192.168.1.1",
         "Community": "替换为你的只读community",
         "Version": "V2C",
+        "TextEncoding": "",
         "IncludeNamePrefixes": [
           "GigabitEthernet",
           "Ten-GigabitEthernet",
@@ -106,6 +108,8 @@ interface GigabitEthernet1/0/1
 
 如果只想监控指定端口，可以填写 `IncludeInterfaceIndexes`。如果想排除个别端口，填写 `ExcludeInterfaceIndexes`。
 
+H3C 设备的接口备注常见是 GBK/GB2312/GB18030 编码，所以默认 `SnmpTextEncoding` 使用 `GB18030`。如果你的设备备注是 UTF-8，可以把全局 `SnmpTextEncoding` 改成 `UTF-8`。如果只有某一台交换机编码特殊，可以在该交换机对象里填写 `TextEncoding` 覆盖全局值。
+
 程序启动时会在 Windows 上自动检查并创建一条出站 UDP SNMP 防火墙规则，默认规则名是 `H3CSwitchPortMonitor SNMP Outbound`。这个规则只放行本程序访问交换机的出站 UDP 161，不会打开本机入站 UDP 161。
 
 ## 多交换机配置示例
@@ -118,6 +122,7 @@ interface GigabitEthernet1/0/1
     "PollIntervalSeconds": 10,
     "RetryCount": 2,
     "RetryDelayMs": 1000,
+    "SnmpTextEncoding": "GB18030",
     "Feishu": {
       "WebhookUrl": "https://open.feishu.cn/open-apis/bot/v2/hook/替换为你的机器人token",
       "Secret": ""
@@ -131,6 +136,7 @@ interface GigabitEthernet1/0/1
         "Version": "V2C",
         "TimeoutMs": 5000,
         "MaxRepetitions": 10,
+        "TextEncoding": "",
         "IncludeNamePrefixes": [
           "GigabitEthernet",
           "Ten-GigabitEthernet",
@@ -149,6 +155,7 @@ interface GigabitEthernet1/0/1
         "Version": "V2C",
         "TimeoutMs": 5000,
         "MaxRepetitions": 10,
+        "TextEncoding": "",
         "IncludeNamePrefixes": [
           "GigabitEthernet",
           "Ten-GigabitEthernet"
@@ -167,6 +174,7 @@ interface GigabitEthernet1/0/1
         "Version": "V2C",
         "TimeoutMs": 5000,
         "MaxRepetitions": 10,
+        "TextEncoding": "",
         "IncludeNamePrefixes": [],
         "IncludeInterfaceIndexes": [
           10101,
@@ -185,12 +193,14 @@ interface GigabitEthernet1/0/1
 - `IncludeNamePrefixes` 不为空时，只监控端口名或端口描述以前缀开头的接口。
 - `IncludeInterfaceIndexes` 不为空时，只监控指定 `ifIndex`。
 - `ExcludeInterfaceIndexes` 用来排除不需要告警的端口。
+- `TextEncoding` 为空时使用全局 `SnmpTextEncoding`；端口备注出现问号或乱码时，优先尝试 `GB18030`、`GBK`、`UTF-8`。
 - 同一台 Windows 监控电脑必须能访问这些交换机的管理 IP 和 UDP 161。
 
 ## 改进建议评估
 
 - SNMP community 默认值：有必要改。生产环境不应该默认 `public`，现在配置模板已改成需要你填写自己的只读 community，安装器也不再默认填 `public`。
 - SNMP 重试机制：有必要改。现在默认失败后重试 2 次，每次间隔 1000ms，用来降低偶发丢包导致的误报。
+- 端口备注编码：有必要支持。H3C 中文备注常见不是 UTF-8，当前默认按 `GB18030` 解码，可通过配置切换。
 - 日志轮转：当前不是最高优先级。程序主要写 Windows Event Log，只有启动失败才写 `logs\startup-error.log`。长期运行后如果需要完整文件日志，再加 Serilog rolling file 更合适。
 - 轮询间隔下限：已经有保护。即使配置成 0，程序也会按 1 秒处理。
 - Prometheus / Metrics：暂时不是必需。这个工具当前定位是端口变化告警；如果后续要做趋势、SLA、端口历史曲线，再加 `/metrics` 或本地 LiteDB/SQLite 会更有价值。
@@ -281,6 +291,7 @@ logs\startup-error.log
 - 飞书机器人 `WebhookUrl` 还没替换成真实地址
 - JSON 格式改坏了
 - 交换机 IP、SNMP community 或 SNMP 版本填写错误
+- 端口备注是问号或乱码时，检查 `SnmpTextEncoding`，H3C 中文备注通常用 `GB18030`
 - 普通用户权限无法创建 Windows 防火墙规则；可以右键 `run-console.cmd` 或 `install-service.cmd` 选择“以管理员身份运行”
 
 ## 手动安装为 Windows 服务

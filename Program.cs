@@ -1,6 +1,9 @@
+using System.Text;
 using H3CSwitchPortMonitor;
 using H3CSwitchPortMonitor.Models;
 using H3CSwitchPortMonitor.Services;
+
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 try
 {

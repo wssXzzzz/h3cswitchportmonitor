@@ -174,6 +174,7 @@ internal static class Program
                 AlertDeviceRecovery = true,
                 RetryCount = 2,
                 RetryDelayMs = 1000,
+                SnmpTextEncoding = "GB18030",
                 StateFile = "state/port-state.json",
                 Firewall = new
                 {
@@ -196,6 +197,7 @@ internal static class Program
                         Version = "V2C",
                         TimeoutMs = 5000,
                         MaxRepetitions = 10,
+                        TextEncoding = "",
                         IncludeNamePrefixes = new[]
                         {
                             "GigabitEthernet",

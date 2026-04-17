@@ -11,6 +11,7 @@ H3C 交换机端口监控 - 绿色版
    - Monitor:Switches:Host：H3C 交换机 IP
    - Monitor:Switches:Community：交换机上配置的只读 SNMP community
    - Monitor:PollIntervalSeconds：轮询间隔秒数
+   - Monitor:SnmpTextEncoding：SNMP 文本解码，H3C 中文备注默认用 GB18030
    - Monitor:Firewall:EnsureSnmpOutboundRule：是否自动创建出站 UDP SNMP 防火墙规则，默认 true
 
 3. 双击 run-console.cmd 前台运行。
@@ -38,6 +39,8 @@ H3C 交换机端口监控 - 绿色版
 不要直接双击 H3CSwitchPortMonitor.exe，先双击 run-console.cmd。这个脚本会在程序退出后暂停窗口。
 
 如果仍然退出，请打开 logs\startup-error.log，把里面的错误内容拿来排查。常见原因是 appsettings.json 没有配置、飞书 Webhook 地址不正确，或者交换机 SNMP 参数填写错误。
+
+如果飞书里的端口备注出现问号或乱码，请检查 appsettings.json 里的 Monitor:SnmpTextEncoding。H3C 中文备注通常用 GB18030；如果你的设备是 UTF-8，可以改成 UTF-8。
 
 五、交换机侧 SNMP 示例
 

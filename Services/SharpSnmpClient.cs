@@ -1,9 +1,11 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using H3CSwitchPortMonitor.Models;
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
+using Microsoft.Extensions.Options;
 
 namespace H3CSwitchPortMonitor.Services;
 
@@ -14,6 +16,14 @@ public sealed class SharpSnmpClient : ISnmpClient
     private const string IfOperStatusOid = "1.3.6.1.2.1.2.2.1.8";
     private const string IfNameOid = "1.3.6.1.2.1.31.1.1.1.1";
     private const string IfAliasOid = "1.3.6.1.2.1.31.1.1.1.18";
+    private readonly MonitorOptions _options;
+    private readonly ILogger<SharpSnmpClient> _logger;
+
+    public SharpSnmpClient(IOptions<MonitorOptions> options, ILogger<SharpSnmpClient> logger)
+    {
+        _options = options.Value;
+        _logger = logger;
+    }
 
     public async Task<IReadOnlyList<InterfaceSnapshot>> ReadInterfacesAsync(SwitchOptions device, CancellationToken cancellationToken)
     {
@@ -29,10 +39,11 @@ public sealed class SharpSnmpClient : ISnmpClient
             var community = new OctetString(device.Community);
             var timeout = Math.Max(1000, device.TimeoutMs);
             var maxRepetitions = Math.Max(1, device.MaxRepetitions);
+            var textEncoding = ResolveTextEncoding(device);
 
-            var descriptions = WalkText(version, endpoint, community, IfDescrOid, timeout, maxRepetitions);
-            var names = WalkText(version, endpoint, community, IfNameOid, timeout, maxRepetitions);
-            var aliases = WalkText(version, endpoint, community, IfAliasOid, timeout, maxRepetitions);
+            var descriptions = WalkText(version, endpoint, community, IfDescrOid, timeout, maxRepetitions, textEncoding);
+            var names = WalkText(version, endpoint, community, IfNameOid, timeout, maxRepetitions, textEncoding);
+            var aliases = WalkText(version, endpoint, community, IfAliasOid, timeout, maxRepetitions, textEncoding);
             var adminStatuses = WalkInt(version, endpoint, community, IfAdminStatusOid, timeout, maxRepetitions);
             var operStatuses = WalkInt(version, endpoint, community, IfOperStatusOid, timeout, maxRepetitions);
 
@@ -53,16 +64,43 @@ public sealed class SharpSnmpClient : ISnmpClient
         }, cancellationToken);
     }
 
+    private Encoding ResolveTextEncoding(SwitchOptions device)
+    {
+        var encodingName = string.IsNullOrWhiteSpace(device.TextEncoding)
+            ? _options.SnmpTextEncoding
+            : device.TextEncoding;
+
+        if (string.IsNullOrWhiteSpace(encodingName))
+        {
+            return Encoding.UTF8;
+        }
+
+        try
+        {
+            return Encoding.GetEncoding(encodingName.Trim());
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException)
+        {
+            _logger.LogWarning(
+                ex,
+                "Unsupported SNMP text encoding {EncodingName} for {SwitchName}. Falling back to UTF-8.",
+                encodingName,
+                device.DisplayName);
+            return Encoding.UTF8;
+        }
+    }
+
     private static Dictionary<int, string> WalkText(
         VersionCode version,
         IPEndPoint endpoint,
         OctetString community,
         string baseOid,
         int timeout,
-        int maxRepetitions)
+        int maxRepetitions,
+        Encoding textEncoding)
     {
         return Walk(version, endpoint, community, baseOid, timeout, maxRepetitions)
-            .Select(variable => new { Index = TryGetIndex(baseOid, variable.Id), Value = ToDisplayString(variable.Data) })
+            .Select(variable => new { Index = TryGetIndex(baseOid, variable.Id), Value = ToDisplayString(variable.Data, textEncoding) })
             .Where(item => item.Index.HasValue)
             .ToDictionary(item => item.Index!.Value, item => item.Value);
     }
@@ -128,11 +166,11 @@ public sealed class SharpSnmpClient : ISnmpClient
             : null;
     }
 
-    private static string ToDisplayString(ISnmpData data)
+    private static string ToDisplayString(ISnmpData data, Encoding textEncoding)
     {
         return data switch
         {
-            OctetString octets => octets.ToString(),
+            OctetString octets => octets.ToString(textEncoding).TrimEnd('\0'),
             _ => data.ToString()
         };
     }
