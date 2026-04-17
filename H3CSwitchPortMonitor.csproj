@@ -11,8 +11,13 @@
 
   <ItemGroup>
     <Compile Remove="installer/**" />
+    <Compile Remove="artifacts/**" />
     <EmbeddedResource Remove="installer/**" />
+    <EmbeddedResource Remove="artifacts/**" />
     <None Remove="installer/**" />
+    <None Remove="artifacts/**" />
+    <Content Remove="installer/**" />
+    <Content Remove="artifacts/**" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,7 +5,13 @@ H3C 交换机端口监控 - 绿色版
 1. 把整个压缩包解压到 Windows 电脑任意目录，例如：
    D:\H3CSwitchPortMonitor
 
-2. 双击 edit-config.cmd，填写 appsettings.json：
+2. 双击 edit-config.cmd，打开图形配置工具：
+   - 可以添加、删除、复制交换机
+   - 可以编辑飞书机器人 Webhook 和 Secret
+   - 可以编辑轮询间隔、重试次数、SNMP 文本编码
+   - 点击“保存配置”后会写入 appsettings.json
+
+   主要字段：
    - Monitor:Feishu:WebhookUrl：飞书群机器人 Webhook 地址
    - Monitor:Feishu:Secret：飞书机器人签名密钥，未启用签名可留空
    - Monitor:Switches:Host：H3C 交换机 IP
@@ -13,6 +19,8 @@ H3C 交换机端口监控 - 绿色版
    - Monitor:PollIntervalSeconds：轮询间隔秒数
    - Monitor:SnmpTextEncoding：SNMP 文本解码，H3C 中文备注默认用 GB18030
    - Monitor:Firewall:EnsureSnmpOutboundRule：是否自动创建出站 UDP SNMP 防火墙规则，默认 true
+
+   如果 Windows Server 没有桌面环境，或者图形工具打不开，可以双击 edit-config-raw.cmd 用记事本直接编辑 appsettings.json。
 
 3. 双击 run-console.cmd 前台运行。
    这个模式适合先测试 SNMP 和飞书是否正常。

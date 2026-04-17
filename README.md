@@ -69,7 +69,9 @@ interface GigabitEthernet1/0/1
 
 ## 配置
 
-编辑发布目录中的 `appsettings.json`：
+绿色版推荐双击 `edit-config.cmd` 打开图形配置工具。它可以直接添加、删除、复制交换机配置，并编辑飞书机器人、轮询间隔、SNMP 编码等基础参数。
+
+如果你运行在 Windows Server Core 或没有桌面环境的服务器上，请用 `edit-config-raw.cmd` 或记事本直接编辑发布目录中的 `appsettings.json`：
 
 ```json
 {
@@ -274,6 +276,12 @@ artifacts\portable\H3CSwitchPortMonitor-portable-win-x64.zip
 ```
 
 把 zip 复制到 Windows 电脑后直接解压。先双击 `edit-config.cmd` 修改配置，再双击 `run-console.cmd` 前台测试运行。需要后台长期运行时，右键 `install-service.cmd` 选择“以管理员身份运行”。
+
+绿色版里的配置相关脚本：
+
+- `edit-config.cmd`：打开图形配置工具，适合添加、删除、复制多台交换机。
+- `edit-config-raw.cmd`：用记事本打开原始 `appsettings.json`。
+- `restart-service.cmd`：保存配置后重启 Windows 服务。
 
 ## 直接闪退排查
 

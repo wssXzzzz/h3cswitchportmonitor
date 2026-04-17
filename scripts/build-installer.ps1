@@ -10,9 +10,8 @@ $InstallerOut = Join-Path $Root "artifacts\installer"
 $PayloadDir = Join-Path $Root "installer\Payload"
 $PayloadZip = Join-Path $PayloadDir "service.zip"
 
-Remove-Item $ServiceOut, $InstallerOut -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item $ServiceOut, $InstallerOut, $PayloadDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $ServiceOut, $InstallerOut, $PayloadDir | Out-Null
-Remove-Item $PayloadZip -Force -ErrorAction SilentlyContinue
 
 dotnet publish (Join-Path $Root "H3CSwitchPortMonitor.csproj") `
     -c Release `
@@ -21,6 +20,18 @@ dotnet publish (Join-Path $Root "H3CSwitchPortMonitor.csproj") `
     -p:PublishSingleFile=true `
     -p:EnableCompressionInSingleFile=true `
     -o $ServiceOut
+
+Remove-Item `
+    (Join-Path $ServiceOut "installer"), `
+    (Join-Path $ServiceOut "artifacts"), `
+    (Join-Path $ServiceOut "bin"), `
+    (Join-Path $ServiceOut "obj") `
+    -Recurse -Force -ErrorAction SilentlyContinue
+
+Copy-Item (Join-Path $Root "portable\config-editor.ps1") $ServiceOut
+Copy-Item (Join-Path $Root "portable\edit-config.cmd") $ServiceOut
+Copy-Item (Join-Path $Root "portable\edit-config-raw.cmd") $ServiceOut
+Copy-Item (Join-Path $Root "portable\restart-service.cmd") $ServiceOut
 
 Compress-Archive -Path (Join-Path $ServiceOut "*") -DestinationPath $PayloadZip -Force
 

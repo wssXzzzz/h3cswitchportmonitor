@@ -9,9 +9,8 @@ INSTALLER_OUT="$ROOT/artifacts/installer"
 PAYLOAD_DIR="$ROOT/installer/Payload"
 PAYLOAD_ZIP="$PAYLOAD_DIR/service.zip"
 
-rm -rf "$SERVICE_OUT" "$INSTALLER_OUT"
+rm -rf "$SERVICE_OUT" "$INSTALLER_OUT" "$PAYLOAD_DIR"
 mkdir -p "$SERVICE_OUT" "$INSTALLER_OUT" "$PAYLOAD_DIR"
-rm -f "$PAYLOAD_ZIP"
 
 "$DOTNET_BIN" publish "$ROOT/H3CSwitchPortMonitor.csproj" \
   -c Release \
@@ -20,6 +19,13 @@ rm -f "$PAYLOAD_ZIP"
   -p:PublishSingleFile=true \
   -p:EnableCompressionInSingleFile=true \
   -o "$SERVICE_OUT"
+
+rm -rf "$SERVICE_OUT/installer" "$SERVICE_OUT/artifacts" "$SERVICE_OUT/bin" "$SERVICE_OUT/obj"
+
+cp "$ROOT/portable/config-editor.ps1" "$SERVICE_OUT/"
+cp "$ROOT/portable/edit-config.cmd" "$SERVICE_OUT/"
+cp "$ROOT/portable/edit-config-raw.cmd" "$SERVICE_OUT/"
+cp "$ROOT/portable/restart-service.cmd" "$SERVICE_OUT/"
 
 (cd "$SERVICE_OUT" && zip -qr "$PAYLOAD_ZIP" .)
 
