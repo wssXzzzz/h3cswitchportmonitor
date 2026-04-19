@@ -140,11 +140,9 @@ public sealed class Worker : BackgroundService
 
             if (previous.OperStatus != port.OperStatus)
             {
-                var stateKey = StateKey(device, port.Index);
-
                 if (port.OperStatus == 2) // went down
                 {
-                    var downCount = ++_portDownCounters.GetValueOrDefault(stateKey, 0);
+                    var downCount = _portDownCounters.GetValueOrDefault(stateKey, 0) + 1;
                     _portDownCounters[stateKey] = downCount;
 
                     if (downCount >= _options.DownConfirmCount)
