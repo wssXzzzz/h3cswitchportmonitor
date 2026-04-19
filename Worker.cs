@@ -13,6 +13,7 @@ public sealed class Worker : BackgroundService
     private readonly PortStateStore _stateStore;
     private readonly WindowsFirewallConfigurator _firewallConfigurator;
     private readonly Dictionary<string, bool> _deviceErrorState = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, int> _portDownCounters = new(StringComparer.OrdinalIgnoreCase);
 
     public Worker(
         ILogger<Worker> logger,
@@ -139,7 +140,27 @@ public sealed class Worker : BackgroundService
 
             if (previous.OperStatus != port.OperStatus)
             {
-                await TryNotifyPortChangedAsync(device, previous, port, stoppingToken);
+                var stateKey = StateKey(device, port.Index);
+
+                if (port.OperStatus == 2) // went down
+                {
+                    var downCount = ++_portDownCounters.GetValueOrDefault(stateKey, 0);
+                    _portDownCounters[stateKey] = downCount;
+
+                    if (downCount >= _options.DownConfirmCount)
+                    {
+                        await TryNotifyPortChangedAsync(device, previous, port, stoppingToken);
+                    }
+                }
+                else if (port.OperStatus == 1) // recovered to up
+                {
+                    _portDownCounters[stateKey] = 0;
+                    await TryNotifyPortChangedAsync(device, previous, port, stoppingToken);
+                }
+                else
+                {
+                    await TryNotifyPortChangedAsync(device, previous, port, stoppingToken);
+                }
             }
         }
     }

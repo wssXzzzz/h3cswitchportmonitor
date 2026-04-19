@@ -6,6 +6,7 @@ public sealed class MonitorOptions
     public bool AlertOnFirstPoll { get; set; }
     public bool AlertDeviceErrors { get; set; } = true;
     public bool AlertDeviceRecovery { get; set; } = true;
+    public int DownConfirmCount { get; set; } = 3;
     public int RetryCount { get; set; } = 2;
     public int RetryDelayMs { get; set; } = 1000;
     public string SnmpTextEncoding { get; set; } = "GB18030";
@@ -34,7 +35,7 @@ public sealed class SwitchOptions
     public int Port { get; set; } = 161;
     public string Community { get; set; } = "";
     public string Version { get; set; } = "V2";
-    public int TimeoutMs { get; set; } = 5000;
+    public int TimeoutMs { get; set; } = 20000;
     public int MaxRepetitions { get; set; } = 10;
     public string TextEncoding { get; set; } = "";
     public List<string> IncludeNamePrefixes { get; set; } = [];
