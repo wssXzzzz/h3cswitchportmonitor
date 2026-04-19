@@ -207,6 +207,29 @@ H3C 设备的接口备注常见是 GBK/GB2312/GB18030 编码，所以默认 `Snm
 - 轮询间隔下限：已经有保护。即使配置成 0，程序也会按 1 秒处理。
 - Prometheus / Metrics：暂时不是必需。这个工具当前定位是端口变化告警；如果后续要做趋势、SLA、端口历史曲线，再加 `/metrics` 或本地 LiteDB/SQLite 会更有价值。
 
+## 更新日志
+
+### v1.0.6 (2026-04-20)
+- 新增 `DownConfirmCount` 配置项：端口需要连续 N 次 down 才发送告警，默认 3 次，防止网络抖动导致的误报
+- 默认 SNMP 超时从 5000ms 提升至 20000ms，提升不稳定网络环境的可靠性
+- 端口恢复 up 时立即发送通知（不需防抖）
+- 新增 GitHub Actions 自动构建 release workflow
+
+### v1.0.5
+- Add visual configuration editor
+
+### v1.0.4
+- Decode SNMP text with configurable encoding
+
+### v1.0.3
+- Add retry settings and multi-switch docs
+
+### v1.0.2
+- Add topology docs and startup diagnostics
+
+### v1.0.1
+- Add SNMP firewall auto-configuration
+
 ## 发布
 
 在装有 .NET 8 SDK 的机器执行：
