@@ -213,7 +213,6 @@ H3C 设备的接口备注常见是 GBK/GB2312/GB18030 编码，所以默认 `Snm
 - 新增 `DownConfirmCount` 配置项：端口需要连续 N 次 down 才发送告警，默认 3 次，防止网络抖动导致的误报
 - 默认 SNMP 超时从 5000ms 提升至 20000ms，提升不稳定网络环境的可靠性
 - 端口恢复 up 时立即发送通知（不需防抖）
-- 新增 GitHub Actions 自动构建 release workflow
 
 ### v1.0.5
 - Add visual configuration editor
